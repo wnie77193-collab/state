@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>STATE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  font-family:Inter,-apple-system;
+  overflow:hidden;
+  transition:background 1s ease;
+}
+
+/* backgrounds per mode */
+body.break{background:radial-gradient(1000px 700px at 20% 20%, #e8b8ff, transparent 60%),
+#f5efff;}
+body.move{background:radial-gradient(1000px 700px at 80% 30%, #cce4ff, transparent 60%),
+#eef6ff;}
+body.ping{background:radial-gradient(1000px 700px at 50% 30%, #ffe0b8, transparent 60%),
+#fff4e6;}
+body.soft{background:radial-gradient(1000px 700px at 50% 30%, #c8f0d9, transparent 60%),
+#f1fbf6;}
+
+#app{
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding-bottom:100px;
+}
+
+/* card */
+#card{
+  background:#fff;
+  border-radius:32px;
+  padding:64px 40px;
+  width:85%;
+  max-width:360px;
+  min-height:260px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.08);
+  animation: float 6s ease-in-out infinite;
+  transition:.6s;
+}
+
+@keyframes float{
+  0%{transform:translateY(0);}
+  50%{transform:translateY(-6px);}
+  100%{transform:translateY(0);}
+}
+
+#card.glow{
+  box-shadow:0 40px 120px rgba(0,0,0,.15);
+}
+
+#card.flip{
+  animation: flip .7s ease;
+}
+
+@keyframes flip{
+  0%{transform:scale(1);}
+  40%{transform:scale(.96) rotateY(10deg);}
+  70%{transform:scale(1.03) rotateY(-8deg);}
+  100%{transform:scale(1);}
+}
+
+#draw{
+  margin-top:30px;
+  padding:14px 48px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.15);
+  background:#fff;
+  letter-spacing:4px;
+}
+
+/* bottom tabs */
+.tabs{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:90px;
+  display:flex;
+  background:rgba(255,255,255,.85);
+  backdrop-filter:blur(10px);
+  border-top:1px solid rgba(0,0,0,.05);
+}
+
+.tab{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  letter-spacing:2px;
+  color:#777;
+}
+.tab.active{color:#000;}
+</style>
+</head>
+
+<body class="break">
+
+<div id="app">
+  <div id="card">DRAW</div>
+  <button id="draw" onclick="draw()">DRAW</button>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="setPool('break')">BREAK</div>
+  <div class="tab" onclick="setPool('move')">MOVE</div>
+  <div class="tab" onclick="setPool('ping')">PING</div>
+  <div class="tab" onclick="setPool('soft')">SOFT</div>
+</div>
+
+<script>
+let current="break";
+
+const pools={
+  break:[
+    ["BREAK — Disrupt the loop", "停下你正在做的事，去另一个房间"],
+    ["BREAK — Break the script", "给一个很久没联系的人发一句：我刚刚想到你"],
+    ["BREAK — Change the rhythm", "把你现在的姿势换掉，坐、站、躺，随便"],
+    ["BREAK — Loud declaration", "在公共场合大喊：我是最棒的！"],
+    ["BREAK — Irregular performance", "在地铁上开始自言自语，放声大笑"],
+    ["BREAK — Talking loud", "走在街上给陌生人打招呼：‘你好，好久不见’"],
+    ["BREAK — Breaking the norm", "去街头唱歌，虽然没有音准"]
+  ],
+  move:[
+    ["MOVE — Shift the body", "拉伸你的肩膀，像刚醒来一样"],
+    ["MOVE — Take one step", "走到最近的窗前，看看外面 30 秒"],
+    ["MOVE — Relocate", "离开你现在的空间，两分钟"],
+    ["MOVE — Travel somewhere new", "今天去一个你从没去过的地方"],
+    ["MOVE — Changing the path", "选择你从未走过的那条小路"],
+    ["MOVE — Active exploration", "随意漫步，随时停下，随时走动"],
+    ["MOVE — New route", "改变你回家的路线，去一个新的地方"]
+  ],
+  ping:[
+    ["PING — Ask the quiet question", "你现在在逃避什么？"],
+    ["PING — Name it", "如果说一句真话，会是什么？"],
+    ["PING — Check in", "你现在最想要什么？"],
+    ["PING — Self-awareness", "你意识到最近自己总是拖延，为什么？"],
+    ["PING — Personal check", "感受自己内心的疲倦，是什么在束缚你？"],
+    ["PING — Why wait?", "你为什么还在等待一个机会？你准备好了吗？"],
+    ["PING — Deep dive", "你为自己的未来做了哪些具体决定？"]
+  ],
+  soft:[
+    ["SOFT — Gentle", "去喝一杯水，慢慢地"],
+    ["SOFT — Pause", "闭上眼睛呼吸三次"],
+    ["SOFT — Care", "对自己说一句温柔的话"],
+    ["SOFT — Small kindness", "给自己买一件小而美的物品"],
+    ["SOFT — Positive talk", "对着镜子微笑，并对自己说：“我很棒！”"],
+    ["SOFT — Self-care", "躺在床上，闭上眼睛，感受片刻安宁"],
+    ["SOFT — Gentle self-praise", "给自己写一个简短的感谢信"]
+  ]
+};
+
+function setPool(p){
+  current=p;
+  document.body.className=p;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  event.target.classList.add("active");
+  document.getElementById("card").innerText="DRAW";
+}
+
+function draw(){
+  const arr=pools[current];
+  const c=arr[Math.floor(Math.random()*arr.length)];
+  const card=document.getElementById("card");
+
+  card.classList.remove("flip");
+  void card.offsetWidth;
+  card.classList.add("flip");
+
+  setTimeout(()=>{
+    card.innerHTML=`<div style="font-family:'Playfair Display';opacity:.5;margin-bottom:16px">${c[0]}</div>
+    <div style="font-size:18px;line-height:1.6">${c[1]}</div>`;
+    card.classList.add("glow");
+  },350);
+}
+</script>
+
+</body>
+</html>
